@@ -9,10 +9,12 @@ REST API для зберігання та управління контакта�
 __
 Postgres is used as database, Redis is used for current user cahing. Therefore 2 docker containers should be created.
 __________________________________________________________________
-4. (( Open Docker desktop and CMD. 
+((
+4. Open Docker desktop and CMD. 
 
 4. 1.  Create docker-container for Postgres DB. 
 Command in CMD: 
+docker pull postgres
 docker run --name hw13_base -p 5433:5432 -e POSTGRES_PASSWORD=qwerty123 -e POSTGRES_DB=hw13_base -d postgres
 --> command:
 docker ps
@@ -24,12 +26,30 @@ Command in CMD:
 docker pull redis
 docker run --name redis-cache -d -p 6379:6379 redis
 
-4. 3. Check in Docker desktop if containers hw13_base and redis-cache are working.))
+4. 3. Check in Docker desktop if containers hw13_base and redis-cache are working.
+))
 ---------------------------------------------------------------------------------------------------------
-4. Instead of creating 2 docker-containers for Redis and Postgres, use Docker Compose tool - command:
+4. Instead of creating 2 docker-containers for Redis and Postgres, use Docker Compose tool - command in terminal:
 docker compose up
 Wait till multicontainer Docker Compose app is created.
 5. Afted Postgres base creation and models.py is ready, perform migration of data to Postgres:
+alembic revision --autogenerate -m 'Init'
+alembic upgrade head
+6. Create file .env in root folder (please see .env.example file)
+7. Run the uvicorn server:  uvicorn main:app --reload
+8. Готово, можна користуватися - зберігати контакти, переглядати їх, редагувати, видаляти, а також перевіряти, чи є дні народження в найближчі 7 днів.
+
+WARNING!
+While performing login, please use your email as a username.
+
+WARNING!
+After registration, you should go to your email box and verify your email box for the service before logging in.
+
+
+
+
+________________________________
+ПРИ РОЗРОБЦІ:
 5. 1. alembic init migrations
 5. 2. Оскільки ми хочемо використовувати автогенерацію SQL скриптів у міграціях alembic, нам необхідно повідомити про це оточення alembic у файлі env.py, який розташований у папці migrations. Відкриємо його і насамперед імпортуємо нашу декларативну базу Base з файлу models.py та рядок підключення SQLALCHEMY_DATABASE_URL до нашої бази даних.
 
@@ -63,6 +83,8 @@ alembic upgrade head
 
 Винести дані про пошту для розслки в файл .env
 
+ВИПРАВИТИ: при спробі користувачем зберегти контакт з мейлом, і цей мейл уже збережений іншим користувачем -
+випадає помилка. Потрібно зробити так, щоб ця перевірка на унікальність мейлів відбувалася на рівні одного користувача, а не по всій таблиця збережених контактів.
 
 Ми реалізували скидання пароля користувача для застосунку Django. Для застосунку FastAPI логіка поведінки 
 буде точно така сама, як і для застосунку Django. За необхідності ми можемо самостійно реалізувати 

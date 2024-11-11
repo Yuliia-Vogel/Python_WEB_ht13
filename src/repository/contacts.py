@@ -62,29 +62,54 @@ async def remove_contact(contact_id: int, user: User, db: Session) -> Contact | 
     return contact
 
 
+# async def get_upcoming_birthdays(user: User, db: Session):
+#     today = date.today()
+#     upcoming = today + timedelta(days=7)
+#     # Порівнюємо лише місяць і день, бо рік народження не має значення для майбутнього ДН
+#     contacts = db.query(Contact).filter(
+#         Contact.owner_id == user.id,  # Фільтруємо за власником
+#         (# Перевіряємо ДН, коли обидві дати знаходяться в межах одного року
+#             (extract('month', Contact.birthday) == today.month) & (extract('day', Contact.birthday) >= today.day) 
+#         ) | (
+#             (extract('month', Contact.birthday) == upcoming.month) & (extract('day', Contact.birthday) <= upcoming.day)
+#         ) | (# Враховуємо перехід через НР (грудень-січень)
+#             (extract('month', Contact.birthday) > today.month) & (extract('month', Contact.birthday) <= upcoming.month)
+#         )
+#     ).all()
+
+#     # Фільтруємо контакти, ДН яких у минулому ( в тч і сьогодні)
+#     future_birthdays = []
+#     for contact in contacts:
+#         if contact.birthday >= today:
+#             future_birthdays.append(contact)
+#         else:
+#             print(f"BD for {contact.birthday, contact.email} already passed.")
+#             continue
+#     return future_birthdays
+
+
 async def get_upcoming_birthdays(user: User, db: Session):
     today = date.today()
     upcoming = today + timedelta(days=7)
-    upcoming = today + timedelta(days=7)
-    # Порівнюємо лише місяць і день, бо рік народження не має значення для майбутнього ДН
-    contacts = db.query(Contact).filter(
-        Contact.owner_id == user.id,  # Фільтруємо за власником
-        (# Перевіряємо ДН, коли обидві дати знаходяться в межах одного року
-            (extract('month', Contact.birthday) == today.month) & (extract('day', Contact.birthday) >= today.day) 
-        ) | (
-            (extract('month', Contact.birthday) == upcoming.month) & (extract('day', Contact.birthday) <= upcoming.day)
-        ) | (# Враховуємо перехід через НР (грудень-січень)
-            (extract('month', Contact.birthday) > today.month) & (extract('month', Contact.birthday) <= upcoming.month)
-        )
-    ).all()
-
-    # Фільтруємо контакти, ДН яких у минулому ( в тч і сьогодні)
+    
+    # Отримуємо всі контакти користувача
+    contacts = db.query(Contact).filter(Contact.owner_id == user.id).all()
+    
     future_birthdays = []
     for contact in contacts:
-        if contact.birthday >= today:
+        # Створюємо "поточний" ДН цього контакту в поточному році
+        birthday_this_year = contact.birthday.replace(year=today.year)
+        
+        # Якщо ДН в цьому році вже минув, то переносимо його на наступний рік
+        if birthday_this_year < today:
+            birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+        
+        # Перевіряємо, чи потрапляє ДН в наступні 7 днів
+        if today <= birthday_this_year <= upcoming:
             future_birthdays.append(contact)
         else:
-            continue
+            print(f"BD for {contact.birthday, contact.email} is not within the upcoming week.")
+    
     return future_birthdays
 
 

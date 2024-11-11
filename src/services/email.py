@@ -1,18 +1,28 @@
+import os
 from pathlib import Path
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from fastapi_mail.errors import ConnectionErrors
 from pydantic import EmailStr
+from dotenv import load_dotenv
 
 from src.services.auth import auth_service
 
+load_dotenv() # завантажуються дані з файлу .env 
+
+mail_username = os.getenv("MAIL_USERNAME_ENV")
+mail_password = os.getenv("MAIL_PASSWORD_ENV")
+mail_from = os.getenv("MAIL_FROM_ENV")
+mail_server = os.getenv("MAIL_SERVER_ENV")
+mail_from_name = os.getenv("MAIL_FROM_NAME_ENV")
+
 conf = ConnectionConfig(
-    MAIL_USERNAME="yuliia_melnychenko88@meta.ua",
-    MAIL_PASSWORD="Kitty_Mitty_Balabitti88",
-    MAIL_FROM="yuliia_melnychenko88@meta.ua",
+    MAIL_USERNAME=mail_username,
+    MAIL_PASSWORD=mail_password,
+    MAIL_FROM=mail_from,
     MAIL_PORT=465,
-    MAIL_SERVER="smtp.meta.ua",
-    MAIL_FROM_NAME="Contact manager. Fast API WEB-service",
+    MAIL_SERVER=mail_server,
+    MAIL_FROM_NAME=mail_from_name,
     MAIL_STARTTLS=False,
     MAIL_SSL_TLS=True,
     USE_CREDENTIALS=True,

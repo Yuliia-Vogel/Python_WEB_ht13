@@ -29,7 +29,6 @@ async def create_contact(body: ContactBase, user: User, db: Session) -> Contact:
     db.add(new_contact)
     db.commit()
     db.refresh(new_contact)
-    # return new_contact
     return ContactResponse.from_orm(new_contact)
 
 
@@ -65,22 +64,27 @@ async def remove_contact(contact_id: int, user: User, db: Session) -> Contact | 
 
 async def get_upcoming_birthdays(user: User, db: Session):
     today = date.today()
-    print(f"today is date: {today}")
     upcoming = today + timedelta(days=7)
     upcoming = today + timedelta(days=7)
     # Порівнюємо лише місяць і день, бо рік народження не має значення для майбутнього ДН
     contacts = db.query(Contact).filter(
         Contact.owner_id == user.id,  # Фільтруємо за власником
-        # Перевіряємо ДН, коли обидві дати знаходяться в межах одного року
-        (extract('month', Contact.birthday) == today.month) & (extract('day', Contact.birthday) >= today.day) |
-        (extract('month', Contact.birthday) == upcoming.month) & (extract('day', Contact.birthday) <= upcoming.day) |
-        # Враховуємо перехід через НР (грудень-січень)
-        (extract('month', Contact.birthday) > today.month) & (extract('month', Contact.birthday) <= upcoming.month)
+        (# Перевіряємо ДН, коли обидві дати знаходяться в межах одного року
+            (extract('month', Contact.birthday) == today.month) & (extract('day', Contact.birthday) >= today.day) 
+        ) | (
+            (extract('month', Contact.birthday) == upcoming.month) & (extract('day', Contact.birthday) <= upcoming.day)
+        ) | (# Враховуємо перехід через НР (грудень-січень)
+            (extract('month', Contact.birthday) > today.month) & (extract('month', Contact.birthday) <= upcoming.month)
+        )
     ).all()
 
     # Фільтруємо контакти, ДН яких у минулому ( в тч і сьогодні)
-    future_birthdays = [contact for contact in contacts if contact.birthday >= today]
-
+    future_birthdays = []
+    for contact in contacts:
+        if contact.birthday >= today:
+            future_birthdays.append(contact)
+        else:
+            continue
     return future_birthdays
 
 

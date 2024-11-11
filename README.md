@@ -1,22 +1,34 @@
 # Python_WEB_ht13_REST_API
 REST API для зберігання та управління контактами. API повинен бути побудований з використанням інфраструктури FastAPI та використовувати SQLAlchemy для управління базою даних.
+Додана авторизація та підтвердження електронної пошти.
 
 
 1. venv
 2. pip install poetry
 3. poetry install --no-root 
-4. Open Docker desktop and CMD. 
+__
+Postgres is used as database, Redis is used for current user cahing. Therefore 2 docker containers should be created.
+__________________________________________________________________
+4. (( Open Docker desktop and CMD. 
 
-4. 1.  Command in CMD: 
+4. 1.  Create docker-container for Postgres DB. 
+Command in CMD: 
 docker run --name hw13_base -p 5433:5432 -e POSTGRES_PASSWORD=qwerty123 -e POSTGRES_DB=hw13_base -d postgres
 --> command:
 docker ps
 --> answer:
 CONTAINER ID   IMAGE      COMMAND                  CREATED          STATUS          PORTS                    NAMES
 f636dccd9d8e   postgres   "docker-entrypoint.s…"   19 seconds ago   Up 18 seconds   0.0.0.0:5433->5432/tcp   hw13_base
+4. 2. Create docker-container for Redis.
+Command in CMD:
+docker pull redis
+docker run --name redis-cache -d -p 6379:6379 redis
 
-4. 2. Check in Docker desktop if container hw13_base is working.
-
+4. 3. Check in Docker desktop if containers hw13_base and redis-cache are working.))
+---------------------------------------------------------------------------------------------------------
+4. Instead of creating 2 docker-containers for Redis and Postgres, use Docker Compose tool - command:
+docker compose up
+Wait till multicontainer Docker Compose app is created.
 5. Afted Postgres base creation and models.py is ready, perform migration of data to Postgres:
 5. 1. alembic init migrations
 5. 2. Оскільки ми хочемо використовувати автогенерацію SQL скриптів у міграціях alembic, нам необхідно повідомити про це оточення alembic у файлі env.py, який розташований у папці migrations. Відкриємо його і насамперед імпортуємо нашу декларативну базу Base з файлу models.py та рядок підключення SQLALCHEMY_DATABASE_URL до нашої бази даних.
@@ -50,3 +62,8 @@ alembic upgrade head
 
 
 Винести дані про пошту для розслки в файл .env
+
+
+Ми реалізували скидання пароля користувача для застосунку Django. Для застосунку FastAPI логіка поведінки 
+буде точно така сама, як і для застосунку Django. За необхідності ми можемо самостійно реалізувати 
+верифікацію email користувача в застосунку REST API. Пропонуємо вам виконати це самостійно.

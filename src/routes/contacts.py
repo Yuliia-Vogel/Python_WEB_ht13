@@ -16,7 +16,6 @@ router = APIRouter(prefix='/contacts', tags=["contacts"]) # до цього apі
 @router.get("/birthdays", response_model=list[ContactResponse]) # для пошуку днів народж. у найбл. 7 днів. Цю функцію слід ставити перед ф-цією пошуку контакту за {contact_id}, інакше фаст-апі проводить пошук саме за {contact_id}, а не днем народження
 async def get_upcoming_birthdays(db: Session = Depends(get_db), 
                                  current_user: User = Depends(auth_service.get_current_user)):
-    print(f"searching upcoming BD for user {current_user.email}")
     bd_contacts = await repository_contacts.get_upcoming_birthdays(current_user, db)
     if not bd_contacts:
         raise HTTPException(status_code=404, detail="No upcoming birthdays")

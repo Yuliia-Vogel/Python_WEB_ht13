@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends, status, Query
+from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
@@ -22,7 +23,8 @@ async def get_upcoming_birthdays(db: Session = Depends(get_db),
     return bd_contacts
 
 
-@router.get("/", response_model=List[ContactResponse])
+@router.get("/", response_model=List[ContactResponse], description='No more than 10 requests per minute',
+            dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 async def get_contacts(skip: int = 0, limit: int = 20, db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user),
                        first_name: str | None = Query(None), 
@@ -43,8 +45,9 @@ async def read_contact(contact_id: int, db: Session = Depends(get_db),
     return contact
 
 
-@router.post("/", response_model=ContactResponse, status_code=status.HTTP_201_CREATED,
-             responses={201: {"description": "Contact created", "model": ContactResponse}})
+@router.post("/", response_model=ContactResponse, description='No more than 5 new contacts per minute',
+            dependencies=[Depends(RateLimiter(times=5, seconds=60))], status_code=status.HTTP_201_CREATED,
+            responses={201: {"description": "Contact created", "model": ContactResponse}})
 async def create_contact(body: ContactBase, db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
     # return await repository_contacts.create_contact(body, current_user, db)

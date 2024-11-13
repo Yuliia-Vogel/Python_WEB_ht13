@@ -1,4 +1,6 @@
 ├── src
+|  ├── conf
+│  |   ├── config.py
 |  ├─database
 │  |   ├── db.py
 │  |   └── models.py
@@ -12,5 +14,7 @@
 │  |   ├── auth.py
 │  |   └── email.py
 │  └── schemas.py
-├── pyproject.toml
-└── main.py
+├── .env.example
+├── docker-compose.yml
+├── main.py
+└── pyproject.toml

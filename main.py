@@ -4,7 +4,7 @@ from fastapi_limiter import FastAPILimiter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse # для обсл.favicon.ico
 
-from src.routes import contacts, auth
+from src.routes import contacts, auth, users
 from src.conf.config import settings
 
 app = FastAPI()
@@ -31,7 +31,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix='/api')
 app.include_router(contacts.router, prefix='/api') # для включення маршрутизації, визначеної в модулі contacts
-
+app.include_router(users.router, prefix='/api')
 
 @app.on_event("startup")
 async def startup():
